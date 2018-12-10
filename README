@@ -9,10 +9,10 @@ Usage
 hvkvp operates in three modes: read, write, and delete.
 Use the built-in help for instructions and examples:
 
-hvkvp –-help
-hvkvp read –-help
-hvkvp write –-help
-hvkvp delete –-help
+hvkvp â€“-help
+hvkvp read â€“-help
+hvkvp write â€“-help
+hvkvp delete â€“-help
 
 Unpack the Tarball
 ------------------
@@ -33,6 +33,10 @@ Other Make Instructions
 -----------------------
 Delete compiled and linked files: make clean
 Create compressed tarball: make tar
+
+Current Release Tarball Download Location
+---------------------------------
+https://github.com/ejsiron/hvkvp/releases
 
 For More Information
 --------------------
