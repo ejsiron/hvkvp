@@ -1,22 +1,29 @@
-/*************************************************************************************\
-hvkvp.cpp (Hyper-V KVP Interface)
-Copyright(C) 2017  Eric Siron
+/*
+MIT License
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+Copyright(c) 2018 Eric Siron
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110 - 1301, USA.
-\*************************************************************************************/
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#include <fstream>
+#include <iostream>
 #include "hvkvp.h"
 
 using std::string;
@@ -30,11 +37,11 @@ const bool HVKVPRecord::hvkvp_isgood(const hvkvp& KVP)
 	\***************************/
 	if (KVP.raw[0] == '\0') { return false; }
 
-	bool NullFound = false;
-	for (int CheckPos = 1; CheckPos < HV_KVP_EXCHANGE_FIELDSIZE; CheckPos++)
+	bool NullFound{ false };
+	for (int CheckPos{ 1 }; CheckPos < HV_KVP_EXCHANGE_FIELDSIZE; ++CheckPos)
 	{
 		if (CheckPos == HV_KVP_EXCHANGE_MAX_KEY_SIZE) { NullFound = false; }	// Reset null locator because this is the first position of the value
-		if (KVP.raw[CheckPos] == '\0') { NullFound = true; }
+		if (KVP.raw[CheckPos] == 0) { NullFound = true; }
 		else { if (NullFound) { return false; } }
 	}
 	return true;
@@ -56,12 +63,6 @@ void HVKVPRecord::ClearValue()
 	std::fill(KVP.pair.value.begin(), KVP.pair.value.end(), 0);
 }
 
-void HVKVPRecord::Deserialize(const std::array<char, HV_KVP_EXCHANGE_FIELDSIZE>& FileBytes, const std::streampos FileOffset)
-{
-	std::copy(FileBytes.begin(), FileBytes.end(), KVP.raw.begin());
-	SourceStreamPosition = FileOffset;
-}
-
 void HVKVPRecord::SetKey(const string& val)
 {
 	ClearKey();
@@ -79,15 +80,11 @@ void HVKVPRecord::SetKey(const string& val)
 void HVKVPRecord::SetValue(const string& val)
 {
 	ClearValue();
-	if (val.length() > 0)
-	{
-		auto endtext = val.end();
-		if (val.length() > HV_KVP_EXCHANGE_MAX_VALUE_SIZE)
-		{
-			endtext = val.begin() + HV_KVP_EXCHANGE_MAX_VALUE_SIZE;
-		}
-		copy(val.begin(), endtext, KVP.pair.value.begin());
-	}
+	auto endtext = val.length() > HV_KVP_EXCHANGE_MAX_VALUE_SIZE ?
+		val.begin() + HV_KVP_EXCHANGE_MAX_VALUE_SIZE
+		:
+		val.end();
+	copy(val.begin(), endtext, KVP.pair.value.begin());
 }
 
 HVKVPRecord::HVKVPRecord(const string& NewKey, const string& NewValue)
@@ -95,12 +92,30 @@ HVKVPRecord::HVKVPRecord(const string& NewKey, const string& NewValue)
 	SetKey(NewKey); SetValue(NewValue);
 }
 
+HVKVPRecord::HVKVPRecord(const HVKVPRecord& rhs)
+{
+	*this = rhs;
+}
+
 HVKVPRecord& HVKVPRecord::operator=(const HVKVPRecord& rhs)
 {
 	if (this != &rhs)
 	{
-		SourceStreamPosition = rhs.SourceStreamPosition;
 		std::copy(rhs.KVP.raw.begin(), rhs.KVP.raw.end(), KVP.raw.begin());
+	}
+	return *this;
+}
+
+HVKVPRecord::HVKVPRecord(HVKVPRecord&& rhs)
+{
+	*this = rhs;
+}
+
+HVKVPRecord& HVKVPRecord::operator=(HVKVPRecord&& rhs)
+{
+	if (this != &rhs)
+	{
+		std::swap(this->KVP, rhs.KVP);
 	}
 	return *this;
 }
@@ -113,8 +128,7 @@ HVKVPRecord::~HVKVPRecord()
 std::istream& operator>>(std::istream& InputStream, HVKVPRecord& kvpin)
 {
 	HVKVPRecord KVPtemp;
-	KVPtemp.SourceStreamPosition = InputStream.tellg();
-	for (unsigned long i = 0; i < KVPtemp.KVP.raw.size(); i++)
+	for (unsigned long i{ 0 }; i < KVPtemp.KVP.raw.size(); ++i)
 	{
 		if (!InputStream || InputStream.bad()) { return InputStream; }
 		InputStream >> std::noskipws >> KVPtemp.KVP.raw[i];
@@ -127,13 +141,12 @@ std::istream& operator>>(std::istream& InputStream, HVKVPRecord& kvpin)
 
 std::ostream& operator<<(std::ostream& OutputStream, const HVKVPRecord& kvpout)
 {
-	OutputStream << std::noskipws << string(kvpout.KVP.pair.key.data()) << ": " << string(kvpout.KVP.pair.value.data());
-	return OutputStream;
+	return OutputStream << std::noskipws << string(kvpout.KVP.pair.key.data()) << ": " << string(kvpout.KVP.pair.value.data());
 }
 
 std::fstream & operator<<(std::fstream& OutputFileStream, const HVKVPRecord& kvpout)
 {
-	for (size_t i = 0; i < kvpout.DataSize(); i++)
+	for (size_t i{ 0 }; i < kvpout.DataSize(); ++i)
 	{
 		OutputFileStream.put(kvpout.KVP.raw.data()[i]);
 	}

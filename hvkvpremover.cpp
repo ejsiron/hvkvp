@@ -1,22 +1,29 @@
-/*************************************************************************************\
+/*
 hvkvpremover.cpp (Hyper-V KVP Interface)
-Copyright(C) 2017  Eric Siron
+Copyright(C) 2018  Eric Siron
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+MIT License
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110 - 1301, USA.
-\*************************************************************************************/
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#include <fstream>
 #include <vector>
 #include <unistd.h>
 #include "hvkvpfile.h"
@@ -33,11 +40,11 @@ const bool HVKVPRemover::IsDuplicateKey(std::vector<string>& FoundKeys, const st
 {
 	errno = 0;
 	std::regex DuplicatesFilter(KeyToCheck, (CaseInsensitive ? std::regex_constants::icase : std::regex_constants::basic));
-	for (auto FoundKey : FoundKeys)
+	for (auto const& FoundKey : FoundKeys)
 	{
 		if (regex_match(FoundKey, DuplicatesFilter)) { return true; }
 	}
-	FoundKeys.push_back(KeyToCheck);
+	FoundKeys.emplace_back(KeyToCheck);
 	return false;
 }
 
@@ -60,8 +67,8 @@ void HVKVPRemover::LocateValidKVPLocations(std::fstream& KVPFile)
 	std::vector<std::string> FoundKeys;
 	std::streampos RecordStartingPosition;
 
-	bool Keep;
-
+	bool Keep{ false };
+	
 	KVPFile.seekg(0, std::fstream::end);
 	while (KVPFile.seekg(-RecordLength, KVPFile.cur))
 	{
@@ -91,7 +98,7 @@ void HVKVPRemover::RemoveInvalidLocations(std::fstream & KVPFile)
 	HVKVPRecord SourceKVP;
 	long RecordLength = HVKVPRecord::DataSize();
 	std::vector<std::streampos>::reverse_iterator ValidLocations = ValidKVPLocations.rbegin();
-	for (unsigned long i = 0; i < ValidKVPLocations.size(); i++)
+	for (unsigned long i{ 0 }; i < ValidKVPLocations.size(); ++i)
 	{
 		KVPFile.seekg(ValidLocations[i], KVPFile.beg);
 		KVPFile >> SourceKVP;

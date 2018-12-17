@@ -1,21 +1,27 @@
-/*************************************************************************************\
+/*
 hvkvpremover.h (Hyper-V KVP Interface)
 Copyright(C) 2017  Eric Siron
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+MIT License
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110 - 1301, USA.
-\*************************************************************************************/
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef __HVKVPREMOVER_H_INCLUDED
 #define __HVKVPREMOVER_H_INCLUDED 1
@@ -23,17 +29,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110 - 1301, USA
 class HVKVPRemover : public HVKVPFile
 {
 private:
-	std::string FileName = HVKVP_FILE_TOHOST; // at this time, we can only remove KVPs from the guest to host file
-	std::string KeyToRemove;
-	bool RemoveDuplicates;
-	bool RemoveInvalid;
-	std::vector<std::streampos> ValidKVPLocations;
+	std::string FileName{ HVKVP_FILE_TOHOST }; // can only remove KVPs from the guest to host file
+	std::string KeyToRemove{};
+	bool RemoveDuplicates{ false };
+	bool RemoveInvalid{ false };
+	std::vector<std::streampos> ValidKVPLocations{};
 	const bool IsDuplicateKey(std::vector<std::string>& FoundKeys, const std::string& KeyToCheck);
 	void LocateValidKVPLocations(std::fstream& KVPFile);
 	void RemoveInvalidLocations(std::fstream& KVPFile);
 public:
 	HVKVPRemover() { MatchExact = true; }
-	bool InverseMatch = false;
+	bool InverseMatch{ false };
 	void RemoveKVP(const std::string& KeyName, const bool CleanDuplicates = false, const bool CleanInvalid = false);
 	void RemoveAll();
 };

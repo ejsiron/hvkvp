@@ -1,7 +1,7 @@
 OBJS = hvkvp.o hvkvpfile.o hvkvpreader.o hvkvpwriter.o hvkvpremover.o main.o
 CC = c++
 DEBUG = -g0
-CXXFLAGS = -Wall -fomit-frame-pointer -std=c++11 -c -fexceptions -O3
+CXXFLAGS = -Wall -fomit-frame-pointer -std=c++14 -c -fexceptions -O3
 LFLAGS = -Wall
 OUT = hvkvp
 INSTALLDIR = /bin/

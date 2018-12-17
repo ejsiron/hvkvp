@@ -1,5 +1,5 @@
 hvkvp -- Reads and writes key-value pairs used in Hyper-V host<->guest communication
-Copyright (C) 2017  Eric Siron
+Copyright (C) 2018  Eric Siron
 
 Microsoft Hyper-V uses key-value pair (KVP) exchange to enable communications between hosts and guests.
 This hvkvp utility runs inside a Linux guest. Use it to read KVPs sent from the host and to transmit KVPs from the guest.
@@ -21,7 +21,7 @@ tar xzf hvkvp.tar.gz
 Install Instructions
 --------------------
 make
-sudo make all
+sudo make install
 
 Uninstall Instructions
 ----------------------
@@ -40,5 +40,6 @@ https://github.com/ejsiron/hvkvp/releases
 
 For More Information
 --------------------
+Information about Hyper-V support for Linux guests: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/supported-linux-and-freebsd-virtual-machines-for-hyper-v-on-windows
 General information about Hyper-V KVP Exchange: http://www.altaro.com/hyper-v/hyper-v-key-value-pair-data-exchange-part-1-explanation/
 Article on Hyper-V KVP Exchange in Linux: http://www.altaro.com/hyper-v/key-value-pair-data-exchange-3-linux/

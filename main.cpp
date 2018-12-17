@@ -1,21 +1,24 @@
-/*************************************************************************************\
-main.cpp (Hyper-V KVP Interface)
-Copyright(C) 2017  Eric Siron
+/*
+MIT License
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-GNU General Public License for more details.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110 - 1301, USA.
-\*************************************************************************************/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <getopt.h>
 #include <iostream>
@@ -121,8 +124,8 @@ string DeleteHelp =
 ": Deletes KVP with key \"GuestReport\"\n\n"
 "hvkvp delete -k guestreport -ni\n"
 ": Deletes all KVPs EXCEPT \"GuestReport\", ignoring case\n\n"
-"hvkvp write -ci\n"
-": Deletes all invalid and duplicate KVPs\n"
+"hvkvp delete -di\n"
+": Deletes all duplicate KVPs\n"
 ;
 
 enum opmodes
@@ -154,7 +157,7 @@ int main(int argc, char **argv)
 		{ "key",					required_argument, 0, 'k' },
 		{ "value",				required_argument, 0, 'v' },
 		{ "ignorecase",		no_argument, &CaseInsensitive, 1 },
-		{ "matchexact",		required_argument, 0, 'm' },
+		{ "exactmatch",		required_argument, 0, 'm' },
 		{ "invertmatch",		no_argument, &InvertMatch, 1 },
 		{ "noout",				no_argument, &NoOutput, 1 },
 		{ "cleaninvalid",		no_argument, &CleanInvalid, 1 },
@@ -163,8 +166,8 @@ int main(int argc, char **argv)
 		{0, 0, 0, 0}
 	};
 
-	int EnteredOptionCharacter;
-	int EnteredOptionIndex;
+	int EnteredOptionCharacter{ 0 };
+	int EnteredOptionIndex{ 0 };
 	opmodes OpMode = None;
 
 	if (argv[1])
@@ -241,7 +244,11 @@ int main(int argc, char **argv)
 
 	if (OpMode == Write)
 	{
-		if (HelpRequested) { cout << WriteHelp; }
+		if (HelpRequested)
+		{
+			cout << WriteHelp;
+			NoOutput = true;
+		}
 		else if (Key.empty())
 		{
 			cout << "Key name (-k/--key) must be specified for a write operation" << endl;
@@ -268,7 +275,11 @@ int main(int argc, char **argv)
 	}
 	else if (OpMode == Delete)
 	{
-		if (HelpRequested) { cout << DeleteHelp; }
+		if (HelpRequested)
+		{
+			cout << DeleteHelp;
+			NoOutput = true;
+		}
 		else if (Key.empty() && !DeleteAll && !CleanDuplicates && !CleanInvalid)
 		{
 			cout << "Delete must include a key (-k/--key) and/or at least one of the following: \n"
