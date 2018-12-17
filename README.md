@@ -174,14 +174,16 @@ Create compressed tarball: ```make tar```
 
 Current versions of Red Hat Enterprise Linux and CentOS ship with GCC 4.8.5 as the official compiler. Unfortunately, that version contains a Standard Library with only partial implementations of certain features that do not clearly indicate their limitations and fail silently when called.
 
-To install on these distributions, you will need to side load a newer compiler. Follow these instructions.
+To install on these distributions, you will need to side load a newer compiler. RHEL customers will need to check with Red Hat for current instructions; you may require a particular license.
+
+Follow these instructions for CentOS:
 
 ### Prerequisites
 
 Install the prerequisites:
 
 ```bash
-sudo yum install centos-release-scl, devtoolset-7-gcc*
+sudo yum install centos-release-scl devtoolset-7-gcc*
 ```
 
 If you use Visual Studio or some other remote tool that operates gcc via the gdb server, run this as well:
